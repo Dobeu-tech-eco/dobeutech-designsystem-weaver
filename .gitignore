@@ -51,3 +51,4 @@ Thumbs.db
 # Agent tooling state
 .omc/
 .claude-flow/
+.env
