@@ -37,7 +37,7 @@ export default function Home() {
         setLocation(`/projects/${data.id}`);
       },
       onError: (err) => {
-        setError(err.error?.error || "Failed to import Markdown.");
+        setError(err.data?.error || "Failed to import Markdown.");
       }
     }
   });
@@ -50,7 +50,7 @@ export default function Home() {
         setLocation(`/projects/${data.id}`);
       },
       onError: (err) => {
-        setError(err.error?.error || "Failed to import Figma.");
+        setError(err.data?.error || "Failed to import Figma.");
       }
     }
   });
@@ -63,7 +63,7 @@ export default function Home() {
         setLocation(`/projects/${data.id}`);
       },
       onError: (err) => {
-        setError(err.error?.error || "Failed to import Repository.");
+        setError(err.data?.error || "Failed to import Repository.");
       }
     }
   });
