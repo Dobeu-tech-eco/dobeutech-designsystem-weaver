@@ -47,3 +47,7 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Agent tooling state
+.omc/
+.claude-flow/

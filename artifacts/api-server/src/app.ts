@@ -3,6 +3,7 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { errorHandler } from "./lib/http-error";
 
 const app: Express = express();
 
@@ -26,9 +27,11 @@ app.use(
   }),
 );
 app.use(cors());
-app.use(express.json());
+// Large limit: .fig uploads arrive base64-encoded in JSON (30MB binary ≈ 40MB base64).
+app.use(express.json({ limit: "60mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+app.use(errorHandler);
 
 export default app;
