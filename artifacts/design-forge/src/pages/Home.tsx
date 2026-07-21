@@ -37,7 +37,7 @@ export default function Home() {
         setLocation(`/projects/${data.id}`);
       },
       onError: (err) => {
-        setError(err.data?.error || "Failed to import Markdown.");
+        setError(err.data?.error || "Failed to import Markdown. The API server may be unavailable.");
       }
     }
   });
@@ -50,7 +50,7 @@ export default function Home() {
         setLocation(`/projects/${data.id}`);
       },
       onError: (err) => {
-        setError(err.data?.error || "Failed to import Figma.");
+        setError(err.data?.error || "Failed to import Figma file. The API server may be unavailable.");
       }
     }
   });
@@ -63,7 +63,7 @@ export default function Home() {
         setLocation(`/projects/${data.id}`);
       },
       onError: (err) => {
-        setError(err.data?.error || "Failed to import Repository.");
+        setError(err.data?.error || "Failed to import repository. The API server may be unavailable.");
       }
     }
   });
@@ -248,7 +248,10 @@ export default function Home() {
                 <Skeleton className="h-4 w-[60%]" />
               </div>
             ) : statsQuery.isError ? (
-              <p className="text-sm text-destructive">Failed to load stats</p>
+              <div className="text-center py-4 text-muted-foreground text-sm">
+                <AlertCircle className="h-5 w-5 mx-auto mb-2 opacity-50" />
+                <p>Backend unavailable</p>
+              </div>
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-center">
@@ -294,7 +297,11 @@ export default function Home() {
                 <Skeleton className="h-10 w-full" />
               </div>
             ) : projectsQuery.isError ? (
-              <p className="text-sm text-destructive">Failed to load projects</p>
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                <AlertCircle className="h-5 w-5 mx-auto mb-2 opacity-50" />
+                <p>Could not reach the API server.</p>
+                <p className="text-xs mt-1">Projects will appear here once the backend is running.</p>
+              </div>
             ) : projectsQuery.data?.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm">
                 No projects yet. Import a source above to get started.

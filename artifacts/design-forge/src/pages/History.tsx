@@ -63,9 +63,10 @@ export default function History() {
               ))}
             </div>
           ) : isError ? (
-            <div className="flex flex-col items-center justify-center py-16 text-destructive">
-              <AlertCircle className="h-8 w-8 mb-4" />
-              <p>Failed to load projects. Please try again later.</p>
+            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <AlertCircle className="h-8 w-8 mb-4 opacity-50" />
+              <p className="font-medium text-foreground">Could not reach the API server</p>
+              <p className="text-sm mt-1">Projects will appear here once the backend is running.</p>
             </div>
           ) : projects?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground text-center">
