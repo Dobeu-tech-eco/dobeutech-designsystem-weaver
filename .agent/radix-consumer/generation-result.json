@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "systemId": "radix",
+  "fileCount": 4,
+  "emitted": [
+    "design-system/radix/theme.tsx",
+    "design-system/radix/accent-scale.css"
+  ],
+  "consumerFiles": [
+    "src/theme.tsx",
+    "src/accent-scale.css"
+  ],
+  "notesPreview": "Mapping summary for Radix Themes (Radix UI (WorkOS)):\n- hue 226° → nearest Radix accent \"blue\", exact scale overridden in CSS\n- radius style rounded → radius=\"medium\", density comfortable → scaling\n- "
+}

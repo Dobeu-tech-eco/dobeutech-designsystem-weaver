@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { db, generationsTable, projectsTable, type GenerationRow } from "@workspace/db";
+import { generationsTable, projectsTable, type GenerationRow } from "@workspace/db";
 import {
   CreateGenerationBody,
   CreateGenerationResponse,
@@ -11,6 +11,7 @@ import { getDesignSystem } from "../lib/design-systems";
 import { generateForSystem } from "../lib/generators";
 import { resolveProfile } from "../lib/profile-schema";
 import { mappingNotes } from "../lib/ai";
+import { requireDb } from "../lib/db-guard";
 import { badRequest, notFound } from "../lib/http-error";
 import { streamCodebaseZip, streamPackageZip } from "../lib/zip";
 import { idParam } from "./projects";
@@ -30,6 +31,7 @@ function toGeneration(row: GenerationRow) {
 }
 
 router.post("/projects/:id/generations", async (req, res) => {
+  const db = requireDb();
   const projectId = idParam(req.params.id);
   const body = CreateGenerationBody.parse(req.body);
   const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId));
@@ -46,7 +48,9 @@ router.post("/projects/:id/generations", async (req, res) => {
     profileJson: JSON.stringify(project.designProfile),
     fileList: pkg.files.map((f) => f.path),
   });
-  const notes = aiNotes ?? `${pkg.deterministicNotes}\n\nNote: AI mapping commentary was unavailable; these notes were generated deterministically.`;
+  const notes =
+    aiNotes ??
+    `${pkg.deterministicNotes}\n\nNote: AI mapping commentary was unavailable; these notes were generated deterministically.`;
 
   const [row] = await db
     .insert(generationsTable)
@@ -64,6 +68,7 @@ router.post("/projects/:id/generations", async (req, res) => {
 });
 
 router.get("/generations/:id", async (req, res) => {
+  const db = requireDb();
   const id = idParam(req.params.id);
   const [row] = await db.select().from(generationsTable).where(eq(generationsTable.id, id));
   if (!row) throw notFound("Generation not found.");
@@ -71,6 +76,7 @@ router.get("/generations/:id", async (req, res) => {
 });
 
 router.delete("/generations/:id", async (req, res) => {
+  const db = requireDb();
   const id = idParam(req.params.id);
   const deleted = await db
     .delete(generationsTable)
@@ -81,6 +87,7 @@ router.delete("/generations/:id", async (req, res) => {
 });
 
 router.get("/generations/:id/download", async (req, res) => {
+  const db = requireDb();
   const id = idParam(req.params.id);
   const query = DownloadGenerationQueryParams.parse(req.query);
   const scope = query.scope ?? "package";

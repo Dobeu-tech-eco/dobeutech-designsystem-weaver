@@ -3,6 +3,13 @@
 > Roadmap to a fully functioning prototype hosted on Vercel.
 > Owner: dobeutech. Repo: `Dobeu-tech-eco/dobeutech-designsystem-weaver`. Generated 2026-07-20.
 
+## Source of Truth (SoT) — 2026-07-23
+
+**This repository (`dobeutech-designsystem-weaver`) is the sole write SoT.**  
+The twin `design-ui-weaver/2026-7-20-Web-App-Maker/Web-App-Maker` is **frozen/archived** — do not dual-write.
+
+**Radix-first proof:** catalog stays all 10 systems; the locked E2E generation proof target is **Radix Themes** (`radix` in `design-systems.ts`). See `.agent/radix-e2e.md`. Maker-unique BOLT docs landed under `docs/BOLT_PRODUCTION_PROMPT.md`.
+
 ## /goal
 
 **Ship a fully functioning prototype of Design System Weaver on Vercel** where a user can:
@@ -102,8 +109,8 @@ Gate to production: `pnpm run typecheck && pnpm run build` green + all 4 import 
 
 - **Front-end:** deploy `artifacts/design-forge` (Vite build) as the primary project; root directory = that package, build via pnpm workspace.
 - **API:** the Express app (`artifacts/api-server`, esbuild → ESM) must run as a Vercel serverless/Node function; keep the `express.json({ limit: "60mb" })` for base64 `.fig` uploads (watch Vercel body-size limits — may need direct-to-storage upload for large `.fig`).
-- **DB:** Vercel Postgres or Neon; `DATABASE_URL` is required at boot (the db module throws if unset).
-- **Secrets:** `OPENAI_API_KEY` (optional — AI is commentary-only, must degrade), `DATABASE_URL` (required).
+- **DB:** Vercel Postgres or Neon. Prefer Neon HTTP when `DATABASE_URL` is a `*.neon.tech` host (or `DB_DRIVER=neon-http` / `USE_NEON_HTTP=1`); otherwise `pg` TCP (Replit). When `DATABASE_URL` is unset, API boots and list routes return empty / mutations return **503** (no import crash).
+- **Secrets:** `AI_INTEGRATIONS_OPENAI_*` (optional — AI is commentary-only; mapping notes degrade; import analysis returns 422 if AI required and unset), `DATABASE_URL` (optional at boot; required for persistence).
 - **Monorepo:** configure Vercel for pnpm workspaces; ensure the `catalog:`/`minimumReleaseAge` install settings hold in CI.
 
 ## Risks / open questions

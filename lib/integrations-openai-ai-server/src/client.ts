@@ -1,18 +1,18 @@
 import OpenAI from "openai";
 
-if (!process.env.AI_INTEGRATIONS_OPENAI_BASE_URL) {
-  throw new Error(
-    "AI_INTEGRATIONS_OPENAI_BASE_URL must be set. Did you forget to provision the OpenAI AI integration?",
-  );
-}
+const baseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL?.trim() ?? "";
+const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY?.trim() ?? "";
 
-if (!process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
-  throw new Error(
-    "AI_INTEGRATIONS_OPENAI_API_KEY must be set. Did you forget to provision the OpenAI AI integration?",
-  );
-}
+/** True when both OpenAI integration env vars are present. */
+export const isAiConfigured = baseURL.length > 0 && apiKey.length > 0;
 
-export const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+/**
+ * OpenAI client when AI env is configured; otherwise null.
+ * Callers must degrade (skip commentary / return 422 on import) when null.
+ */
+export const openai: OpenAI | null = isAiConfigured
+  ? new OpenAI({
+      apiKey,
+      baseURL,
+    })
+  : null;

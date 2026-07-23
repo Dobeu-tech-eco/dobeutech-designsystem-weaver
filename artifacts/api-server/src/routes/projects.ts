@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { count, desc, eq, sql } from "drizzle-orm";
-import { db, generationsTable, projectsTable, type ProjectRow } from "@workspace/db";
+import { generationsTable, projectsTable, type ProjectRow } from "@workspace/db";
 import {
   GetProjectResponse,
   ImportFigmaBody,
@@ -17,6 +17,7 @@ import { analyzeMarkdown } from "../lib/analysis/markdown";
 import { analyzeFigma } from "../lib/analysis/figma";
 import { analyzeRepo } from "../lib/analysis/repo";
 import { designProfileSchema, toProfileJson } from "../lib/profile-schema";
+import { requireDb, isDatabaseConfigured } from "../lib/db-guard";
 import { badRequest, notFound } from "../lib/http-error";
 
 const router: IRouter = Router();
@@ -48,6 +49,7 @@ export function toProject(row: ProjectRow, generationCount: number) {
 }
 
 async function generationCountsByProject(): Promise<Map<number, number>> {
+  const db = requireDb();
   const rows = await db
     .select({ projectId: generationsTable.projectId, n: count() })
     .from(generationsTable)
@@ -56,12 +58,18 @@ async function generationCountsByProject(): Promise<Map<number, number>> {
 }
 
 router.get("/projects", async (_req, res) => {
+  if (!isDatabaseConfigured) {
+    res.json(ListProjectsResponse.parse([]));
+    return;
+  }
+  const db = requireDb();
   const rows = await db.select().from(projectsTable).orderBy(desc(projectsTable.createdAt));
   const counts = await generationCountsByProject();
   res.json(ListProjectsResponse.parse(rows.map((row) => toProject(row, counts.get(row.id) ?? 0))));
 });
 
 router.post("/projects/import/markdown", async (req, res) => {
+  const db = requireDb();
   const body = ImportMarkdownBody.parse(req.body);
   const analysis = await analyzeMarkdown(body.fileName, body.content);
   const fallbackName = body.fileName.replace(/\.(md|markdown|txt)$/i, "");
@@ -82,6 +90,7 @@ router.post("/projects/import/markdown", async (req, res) => {
 });
 
 router.post("/projects/import/figma", async (req, res) => {
+  const db = requireDb();
   const body = ImportFigmaBody.parse(req.body);
   if ((body.contentBase64.length * 3) / 4 > MAX_FIG_BYTES + 4) {
     throw badRequest("The .fig file exceeds the 30MB limit.");
@@ -107,6 +116,7 @@ router.post("/projects/import/figma", async (req, res) => {
 });
 
 router.post("/projects/import/repo", async (req, res) => {
+  const db = requireDb();
   const body = ImportRepoBody.parse(req.body);
   const analysis = await analyzeRepo(body.repoUrl);
   const [row] = await db
@@ -128,6 +138,7 @@ router.post("/projects/import/repo", async (req, res) => {
 });
 
 router.get("/projects/:id", async (req, res) => {
+  const db = requireDb();
   const id = idParam(req.params.id);
   const [row] = await db.select().from(projectsTable).where(eq(projectsTable.id, id));
   if (!row) throw notFound("Project not found.");
@@ -159,6 +170,7 @@ router.get("/projects/:id", async (req, res) => {
 });
 
 router.patch("/projects/:id", async (req, res) => {
+  const db = requireDb();
   const id = idParam(req.params.id);
   const body = UpdateProjectBody.parse(req.body);
   if (body.name === undefined && body.designProfile === undefined) {
@@ -179,6 +191,7 @@ router.patch("/projects/:id", async (req, res) => {
 });
 
 router.delete("/projects/:id", async (req, res) => {
+  const db = requireDb();
   const id = idParam(req.params.id);
   const deleted = await db.delete(projectsTable).where(eq(projectsTable.id, id)).returning({ id: projectsTable.id });
   if (deleted.length === 0) throw notFound("Project not found.");

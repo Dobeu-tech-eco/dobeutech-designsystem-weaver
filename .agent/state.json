@@ -1,0 +1,92 @@
+{
+  "timestamp": "2026-07-23T04:30:00.000Z",
+  "platform": "cursor",
+  "workingDir": "C:\\Users\\JeremyWilliams\\repos\\dobeutech-designsystem-weaver",
+  "sot": "dobeutech-designsystem-weaver",
+  "maker": "design-ui-weaver/2026-7-20-Web-App-Maker/Web-App-Maker",
+  "makerStatus": "frozen",
+  "lockedDs": "radix",
+  "step1Baseline": {
+    "checkpoint": "step-1-baseline-memory",
+    "recordedAt": "2026-07-23T04:15:00Z",
+    "health": {
+      "pnpm_run_typecheck": "fail",
+      "pnpm_run_build": "not_run_blocked",
+      "typecheck_libs_tsc_build": "pass",
+      "packages": {
+        "api-server": "pass",
+        "design-forge": "not_run",
+        "mockup-sandbox": "pass",
+        "scripts": "pass"
+      },
+      "blocker": {
+        "id": "win32-preinstall-sh",
+        "severity": "warning",
+        "detail": "package.json preinstall uses sh; unavailable in Windows cmd. Direct tsc works for libs + most artifacts. Not fixed in Step 1."
+      }
+    },
+    "inventory": {
+      "weaver_unique_or_ahead": [
+        "vercel.json",
+        "AGENTS.md",
+        "supabase/migrations/20260721032905_create_projects_and_generations.sql"
+      ],
+      "maker_unique": [
+        "docs/BOLT_PRODUCTION_PROMPT.md"
+      ],
+      "shared_key_paths": [
+        "artifacts/api-server/src/lib/design-systems.ts",
+        "artifacts/api-server/src/lib/generators/index.ts",
+        "lib/api-spec/openapi.yaml",
+        "docs/BOLT_SETUP.md",
+        "docs/PRODUCTION_PLAN.md"
+      ]
+    },
+    "ruflo_memory": {
+      "research": [
+        "weaver-sot-goal-2026-07-22",
+        "weaver-sot-inventory-paths-2026-07-22"
+      ],
+      "tasks": [
+        "weaver-sot-step1-baseline-task"
+      ]
+    }
+  },
+  "cutover": {
+    "status": "complete",
+    "unblockedBy": ["CUTOVER-DEFER-AUTH", "CUTOVER-DEFER-SSRF", "CUTOVER-DEFER-TAR"],
+    "bootDbMitigated": true,
+    "bootAiMitigated": true
+  },
+  "build": {
+    "typecheck": "green",
+    "typecheckNote": "Run via Git Bash on Windows (preinstall needs sh)",
+    "build": "partial",
+    "buildNote": "Full vite build fails on Windows: pnpm overrides prune non-linux rollup/esbuild binaries (Replit linux-x64). Expected; typecheck is the gate."
+  },
+  "connections": {
+    "opsera": "blocked_user_not_registered",
+    "rufloMemory": "step1_keys_written"
+  },
+  "artifacts": [
+    ".agent/progress.md",
+    ".agent/state.json",
+    ".agent/tasks.json",
+    ".agent/architecture-risk-register.md",
+    ".agent/dual-repo-review-findings.md",
+    ".agent/critical-tickets.md",
+    ".agent/migration-inventory.md",
+    ".agent/radix-e2e.md",
+    ".agent/radix-consumer/",
+    ".agent/scripts/prove-radix.ts",
+    "agents/weaver-migration-runner.md",
+    "docs/BOLT_PRODUCTION_PROMPT.md",
+    "docs/PRODUCTION_PLAN.md"
+  ],
+  "nextActions": [
+    "Optional: full pnpm run build in Git Bash",
+    "Optional: provision Opsera + Neon HTTP dedicated entry",
+    "Post-cutover: CUTOVER-DEFER-AUTH/SSRF/TAR"
+  ],
+  "handoff": "Weaver is sole SoT; Maker archived; Radix generation proven in-process + consumer typecheck. Step 1 Ruflo memory keys written under research/tasks."
+}

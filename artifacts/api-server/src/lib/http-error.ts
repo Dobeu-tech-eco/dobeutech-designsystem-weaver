@@ -22,6 +22,11 @@ export function unprocessable(message: string): HttpError {
   return new HttpError(422, message);
 }
 
+/** 503 — dependency missing (DB unset, etc.). */
+export function serviceUnavailable(message: string): HttpError {
+  return new HttpError(503, message);
+}
+
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
   if (res.headersSent) {
     res.end();

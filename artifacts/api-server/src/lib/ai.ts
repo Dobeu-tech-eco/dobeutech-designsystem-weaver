@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { openai } from "@workspace/integrations-openai-ai-server";
+import { isAiConfigured, openai } from "@workspace/integrations-openai-ai-server";
 import { designProfileSchema } from "./profile-schema";
 import { unprocessable } from "./http-error";
 
@@ -52,6 +52,9 @@ function extractJsonObject(text: string): string {
 }
 
 async function chatJson(messages: { role: "system" | "user"; content: string }[]): Promise<string> {
+  if (!openai) {
+    throw new Error("AI integration not configured");
+  }
   try {
     const res = await openai.chat.completions.create({
       model: MODEL,
@@ -76,6 +79,11 @@ async function chatJson(messages: { role: "system" | "user"; content: string }[]
  * Throws 422 if a valid profile cannot be produced after a retry — analysis failures are explicit.
  */
 export async function composeProfile(instructions: string, evidence: string): Promise<AiProfileResult> {
+  if (!isAiConfigured || !openai) {
+    throw unprocessable(
+      "AI analysis unavailable: AI_INTEGRATIONS_OPENAI_BASE_URL / AI_INTEGRATIONS_OPENAI_API_KEY are not configured.",
+    );
+  }
   const baseMessages: { role: "system" | "user"; content: string }[] = [
     {
       role: "system",
@@ -128,6 +136,9 @@ export async function mappingNotes(args: {
   profileJson: string;
   fileList: string[];
 }): Promise<string | null> {
+  if (!isAiConfigured || !openai) {
+    return null;
+  }
   try {
     const res = await openai.chat.completions.create({
       model: MODEL,

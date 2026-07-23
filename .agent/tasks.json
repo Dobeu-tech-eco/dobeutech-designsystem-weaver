@@ -1,0 +1,77 @@
+{
+  "session": "weaver-sot-orchestration-2026-07-23",
+  "locked_ds": "radix",
+  "sot": "dobeutech-designsystem-weaver",
+  "features": [
+    {
+      "id": "step-1-baseline",
+      "category": "plan",
+      "description": "Baseline Weaver health + inventory + progress/state",
+      "steps": ["Inventory repos", "Record typecheck", "Write .agent progress/state"],
+      "status": "completed",
+      "passes": true,
+      "priority": 1,
+      "dependencies": []
+    },
+    {
+      "id": "step-2-architecture",
+      "category": "security",
+      "description": "Opsera/local architecture risk register",
+      "steps": ["Opsera auth or blocked note", "Write architecture-risk-register.md"],
+      "status": "completed",
+      "passes": true,
+      "priority": 2,
+      "dependencies": ["step-1-baseline"]
+    },
+    {
+      "id": "step-3-review",
+      "category": "review",
+      "description": "Dual-repo review findings + deferral tickets",
+      "steps": ["Findings file", "critical-tickets.md"],
+      "status": "completed",
+      "passes": true,
+      "priority": 3,
+      "dependencies": ["step-2-architecture"]
+    },
+    {
+      "id": "step-4-migrate",
+      "category": "migration",
+      "description": "Diff inventory; port BOLT docs; freeze Maker",
+      "steps": ["migration-inventory.md", "Port BOLT_PRODUCTION_PROMPT", "Maker README freeze"],
+      "status": "completed",
+      "passes": true,
+      "priority": 4,
+      "dependencies": ["step-3-review"]
+    },
+    {
+      "id": "step-5-harden",
+      "category": "impl",
+      "description": "Graceful DB/AI boot + Vite /api proxy",
+      "steps": ["Optional DATABASE_URL", "Optional AI env", "Confirm Vite proxy"],
+      "status": "completed",
+      "passes": true,
+      "priority": 5,
+      "dependencies": ["step-4-migrate"]
+    },
+    {
+      "id": "step-6-radix",
+      "category": "test",
+      "description": "Prove DesignProfile → buildRadix → consumer",
+      "steps": ["Run prove-radix", "Emit theme.tsx + accent-scale.css", "Consumer typecheck"],
+      "status": "completed",
+      "passes": true,
+      "priority": 6,
+      "dependencies": ["step-5-harden"]
+    },
+    {
+      "id": "step-7-cutover",
+      "category": "docs",
+      "description": "SoT cutover docs + harness agent",
+      "steps": ["PRODUCTION_PLAN SoT note", "tasks.json", "weaver-migration-runner agent"],
+      "status": "completed",
+      "passes": true,
+      "priority": 7,
+      "dependencies": ["step-6-radix"]
+    }
+  ]
+}

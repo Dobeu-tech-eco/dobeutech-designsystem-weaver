@@ -87,21 +87,21 @@ Deferred until after SoT. Does **not** block cutover once this ticket is filed.
 | **Ticket ID** | `STEP5-HARDEN-BOOT-DB` |
 | **Finding** | `CRIT-BOOT-DB-001` — Hard fail without `DATABASE_URL` |
 | **Severity** | `critical` |
-| **Status** | `in-progress` (Step 5 harden) |
+| **Status** | `done` (Step 5 harden) |
 | **Owner** | Step 5 harden |
 | **Location** | `lib/db` |
-| **Unblocks cutover** | **Yes** — tracked under Step 5; does not gate cutover filing |
+| **Unblocks cutover** | **Yes** — mitigated |
 
 ### Summary
 Module import throws if `DATABASE_URL` is unset, so the API cannot boot without Postgres env.
 
 ### Acceptance criteria
-- [ ] Boot path fails gracefully with a clear config error (or deferred DB init) instead of opaque import throw where appropriate.
-- [ ] Documented required env for production; local/dev guidance updated.
-- [ ] Health/readiness reflects DB availability without crashing the process at import time (if that is the Step 5 design).
+- [x] Boot path fails gracefully (`db` null; list empty / mutations 503) instead of opaque import throw.
+- [x] Documented in `docs/PRODUCTION_PLAN.md` + `docs/BOLT_SETUP.md`.
+- [x] Process no longer crashes at import when DATABASE_URL unset.
 
 ### Notes
-Assigned to Step 5 harden (in progress). Filing/tracking this work **unblocks cutover**; fix lands in Step 5.
+Mitigated 2026-07-23 in `lib/db/src/index.ts` + route `requireDb()`.
 
 ---
 
@@ -112,21 +112,21 @@ Assigned to Step 5 harden (in progress). Filing/tracking this work **unblocks cu
 | **Ticket ID** | `STEP5-HARDEN-BOOT-AI` |
 | **Finding** | `CRIT-BOOT-AI-001` — Hard fail without OpenAI integration env |
 | **Severity** | `critical` |
-| **Status** | `in-progress` (Step 5 harden) |
+| **Status** | `done` (Step 5 harden) |
 | **Owner** | Step 5 harden |
 | **Location** | OpenAI client / integrations |
-| **Unblocks cutover** | **Yes** — tracked under Step 5; does not gate cutover filing |
+| **Unblocks cutover** | **Yes** — mitigated |
 
 ### Summary
 OpenAI client throws if `AI_INTEGRATIONS_OPENAI_API_KEY` / `AI_INTEGRATIONS_OPENAI_BASE_URL` are unset, blocking server start even when generation can use deterministic notes.
 
 ### Acceptance criteria
-- [ ] Server boots without OpenAI env when AI features are unused/optional.
-- [ ] Import/AI paths report clear errors when keys are missing; generate/download retain deterministic fallback.
-- [ ] Env requirements documented for full import vs generate-only flows.
+- [x] Server boots without OpenAI env (`openai` null / `isAiConfigured`).
+- [x] Import/AI paths return 422 when keys missing; generate mapping notes fall back deterministically.
+- [x] Env requirements documented in PRODUCTION_PLAN / BOLT_SETUP.
 
 ### Notes
-Assigned to Step 5 harden (in progress). Filing/tracking this work **unblocks cutover**; fix lands in Step 5.
+Mitigated 2026-07-23 in `lib/integrations-openai-ai-server` + `artifacts/api-server/src/lib/ai.ts`.
 
 ---
 
@@ -137,7 +137,7 @@ Assigned to Step 5 harden (in progress). Filing/tracking this work **unblocks cu
 | `CUTOVER-DEFER-AUTH` | CRIT-AUTH-001 | deferred | Filing **unblocks** cutover |
 | `CUTOVER-DEFER-SSRF` | CRIT-SSRF-001 | deferred | Filing **unblocks** cutover |
 | `CUTOVER-DEFER-TAR` | CRIT-TAR-001 | deferred | Filing **unblocks** cutover |
-| `STEP5-HARDEN-BOOT-DB` | CRIT-BOOT-DB-001 | in-progress | Step 5; does not block cutover |
-| `STEP5-HARDEN-BOOT-AI` | CRIT-BOOT-AI-001 | in-progress | Step 5; does not block cutover |
+| `STEP5-HARDEN-BOOT-DB` | CRIT-BOOT-DB-001 | **done** | Mitigated Step 5 |
+| `STEP5-HARDEN-BOOT-AI` | CRIT-BOOT-AI-001 | **done** | Mitigated Step 5 |
 
-**Explicit note:** Filing these tickets **unblocks cutover**. Auth/SSRF/tar fixes run post-SoT; boot hardening continues in Step 5.
+**Explicit note:** Filing CUTOVER-DEFER-* tickets **unblocked cutover**. Auth/SSRF/tar fixes run post-SoT; boot hardening completed in Step 5.
