@@ -4,6 +4,8 @@
 **Repos:** `dobeutech-designsystem-weaver` (Weaver) ↔ `design-ui-weaver/2026-7-20-Web-App-Maker` (Maker)  
 **Cutover status:** Blocked until deferral tickets filed — see [`critical-tickets.md`](./critical-tickets.md). Tickets below **unblock** cutover (work deferred post-SoT / Step 5).
 
+**Persistence:** Files landed via [PR #4](https://github.com/Dobeu-tech-eco/dobeutech-designsystem-weaver/pull/4); local checkout of `agent/step3-dual-repo-findings`.
+
 ## Critical
 
 ### CRIT-AUTH-001 — No authentication on `/api`
