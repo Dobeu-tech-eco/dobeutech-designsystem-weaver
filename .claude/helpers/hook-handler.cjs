@@ -7,11 +7,24 @@
  *
  * Commands:
  *   route          - Route a task to optimal agent (reads PROMPT from env/stdin)
- *   pre-bash       - Validate command safety before execution
+ *   pre-bash       - Validate command safety before execution (Cursor PreToolUse JSON)
+ *   pre-edit       - Allow Write/Edit tools (Cursor PreToolUse JSON)
  *   post-edit      - Record edit outcome for learning
  *   session-restore - Restore previous session state
  *   session-end    - End session and persist state
  */
+
+/** Cursor PreToolUse hooks require permissionDecision JSON on stdout only. */
+function emitPreToolAllow() {
+  process.stdout.write(JSON.stringify({ permissionDecision: 'allow' }) + '\n');
+}
+
+function emitPreToolDeny(reason) {
+  process.stdout.write(JSON.stringify({
+    permissionDecision: 'deny',
+    permissionDecisionReason: reason,
+  }) + '\n');
+}
 
 const path = require('path');
 const fs = require('fs');
@@ -417,15 +430,23 @@ const handlers = {
     // re-binds `prompt` or `hookInput.command` to a non-string, `.toLowerCase()`
     // can no longer throw a TypeError that the global try/catch would swallow
     // (silently exiting 0 and letting the dangerous command through).
+    // Cursor PreToolUse: stdout must be permissionDecision JSON only; diagnostics → stderr.
     const cmd = String(hookInput.command || toolInput.command || prompt || '').toLowerCase();
     const dangerous = ['rm -rf /', 'format c:', 'del /s /q c:\\', ':(){:|:&};:'];
     for (const d of dangerous) {
       if (cmd.includes(d)) {
-        console.error(`[BLOCKED] Dangerous command detected: ${d}`);
-        process.exit(1);
+        process.stderr.write(`[BLOCKED] Dangerous command detected: ${d}\n`);
+        emitPreToolDeny(`Dangerous command detected: ${d}`);
+        return;
       }
     }
-    console.log('[OK] Command validated');
+    process.stderr.write('[OK] Command validated\n');
+    emitPreToolAllow();
+  },
+
+  'pre-edit': () => {
+    // Cursor PreToolUse for Write/Edit — allow with valid permissionDecision JSON only.
+    emitPreToolAllow();
   },
 
   'post-edit': () => {
@@ -544,14 +565,26 @@ const handlers = {
     try {
       await Promise.resolve(handlers[command]());
     } catch (e) {
-      // Hooks should never crash Claude Code - fail silently
-      console.log(`[WARN] Hook ${command} encountered an error: ${e.message}`);
+      // Hooks should never crash Claude Code - fail silently.
+      // PreToolUse (pre-*) must keep stdout as permissionDecision JSON only.
+      if (String(command).startsWith('pre-')) {
+        process.stderr.write(`[WARN] Hook ${command} encountered an error: ${e.message}\n`);
+        emitPreToolAllow();
+      } else {
+        console.log(`[WARN] Hook ${command} encountered an error: ${e.message}`);
+      }
     }
   } else if (command) {
-    // Unknown command - pass through without error
-    console.log(`[OK] Hook: ${command}`);
+    // Unknown command - pass through without error.
+    // Cursor PreToolUse-related unknowns must emit allow JSON (not plain text).
+    if (String(command).startsWith('pre-')) {
+      process.stderr.write(`[OK] Hook: ${command}\n`);
+      emitPreToolAllow();
+    } else {
+      console.log(`[OK] Hook: ${command}`);
+    }
   } else {
-    console.log('Usage: hook-handler.cjs <route|pre-bash|post-edit|session-restore|session-end|pre-task|post-task|stats>');
+    console.log('Usage: hook-handler.cjs <route|pre-bash|pre-edit|post-edit|session-restore|session-end|pre-task|post-task|stats>');
   }
 }
 
